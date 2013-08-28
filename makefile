@@ -12,16 +12,17 @@ diffc: PrimeGenerator
 PrimeGenerator: primeGenerator.cpp
 	g++ -pedantic -Wall primeGenerator.cpp -o PrimeGenerator
 
-runp: primeGenerator.rb
+runr: primeGenerator.rb
 	ruby primeGenerator.rb
 
-runpi: primeGenerator.rb
+runri: primeGenerator.rb
 	ruby primeGenerator.rb < primeGenerator.in
 
-diffp: primeGenerator.rb
+diffr: primeGenerator.rb
 	ruby primeGenerator.rb < primeGenerator.in > primeGenerator.tmp
 	diff primeGenerator.out primeGenerator.tmp
 	rm -f primeGenerator.tmp
 
 clean:
 	rm -f primeGenerator.tmp
+	rm -f PrimeGenerator
