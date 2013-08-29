@@ -13,33 +13,37 @@ typedef int value_type;
 typedef long long_value_type;
 typedef std::vector<bool> sieve_table;
 
-// Constants
+
+// Globals
 const value_type UPPER_LIMIT = 1000000000;
+const value_type SQRT_UPPER_LIMIT = static_cast<value_type> (sqrt(UPPER_LIMIT));
+sieve_table smallPrimes (SQRT_UPPER_LIMIT + 1, true);
 
 /**
- * Uses the Sieve of Ertosthenes algorithm to mark values as composite
+ * Set up the initial cache of small primes
+ * Uses the Sieve of Erotosthenes to fill the initial values
  */
-void ertosthenes(sieve_table& result, value_type begin, value_type end) {
+void initSmallPrimes() {
+    smallPrimes[0] = false;
+    smallPrimes[1] = false;
+    for (value_type i = 2; i <= SQRT_UPPER_LIMIT; ++i) {
+        if (smallPrimes[i]) {
+            for (int j = i * i; j <= SQRT_UPPER_LIMIT; j += i)
+                smallPrimes[j] = false;
+        }
+    }
+}
+
+/**
+ * Uses the Segmented Sieve of Ertosthenes algorithm to mark values as composite
+ */
+void getPrimesInRange(sieve_table& result, value_type begin, value_type end) {
     // Make sure we have enough room
     value_type lengthOfRange = end - begin + 1;
     result.resize(lengthOfRange, true);
 
-    // We must generate all prime numbers from 2 to sqrt(n)
-    const value_type SQRT_END = static_cast<value_type> (sqrt(end));
-    sieve_table smallPrimes (SQRT_END + 1, true);
-
-    smallPrimes[0] = false;
-    smallPrimes[1] = false;
-    for (value_type i = 2; i <= SQRT_END;) {
-        for (int j = i * i; j <= SQRT_END; j += i)
-            smallPrimes[j] = false;
-        ++i;
-        while (i <= SQRT_END && !smallPrimes[i])
-            ++i;
-    }
-
     // Eliminate from target primes
-    for (value_type k = 2; k <= SQRT_END; ++k) {
+    for (value_type k = 2; k <= SQRT_UPPER_LIMIT; ++k) {
         if (smallPrimes[k]) {
             // (x + y - 1) / y gets the ceiling of int division
             // i starts at ceil(begin / k) * k - a
@@ -84,7 +88,7 @@ void runCase() {
     readRange(range);
 
     sieve_table mySieveTable;
-    ertosthenes(mySieveTable, range[0], range[1]);
+    getPrimesInRange(mySieveTable, range[0], range[1]);
 
     value_type dist = range[1] - range[0];
 
@@ -99,6 +103,8 @@ int main() {
     double time_diff;
     clock_t start, end;
     start = clock();
+
+    initSmallPrimes();
 
     int numberOfLines;
     std::cin >> numberOfLines;
