@@ -1,83 +1,53 @@
 // Prime Generator in C++
 #include <iostream>
-#include <vector>   // vector
-#include <cstring>  // memset
-#include <cmath>    // sqrt
-#include <cassert>  // assert
+#include <vector>     // vector
+#include <iterator>   // back_inserter
+#include <algorithm>  // fill
+#include <ctime>      // clock_t, clock
+#include <cstring>    // memset
+#include <cmath>      // sqrt
+#include <cassert>    // assert
 
 // typedefs
 typedef int value_type;
 typedef long long_value_type;
-
 typedef std::vector<bool> sieve_table;
-typedef std::vector<value_type> eager_cache_type;
-typedef eager_cache_type::iterator eager_cache_type_iterator;
 
-// Limits on input
+// Constants
 const value_type UPPER_LIMIT = 1000000000;
-const value_type SQRT_UPPER_LIMIT = ceil((sqrt(UPPER_LIMIT)));
-
-// The eager cache
-eager_cache_type global_eager_cache;
 
 /**
- * Fill the eager cache when first running
- *
- * This will create a list of all prime numbers between 2
- * and UPPER_LIMIT
- *
- * There are too many prime numbers to include all values in the source as
- * a meta cache
- *
- * Uses the Sieve of Atkin algorithm
+ * Uses the Sieve of Ertosthenes algorithm to mark values as composite
  */
-void fillEagerCache() {
-    // Initialize the sieve table
-    sieve_table mySieveTable (UPPER_LIMIT + 1, false);
+void ertosthenes(sieve_table& result, value_type begin, value_type end) {
+    // Make sure we have enough room
+    value_type lengthOfRange = end - begin + 1;
+    result.resize(lengthOfRange, true);
 
-    // assert(false);
+    // We must generate all prime numbers from 2 to sqrt(n)
+    const value_type SQRT_END = static_cast<value_type> (sqrt(end));
+    sieve_table smallPrimes (SQRT_END + 1, true);
 
-    mySieveTable[2] = true;
-    mySieveTable[3] = true;
-
-    for (value_type i = 1; i <= SQRT_UPPER_LIMIT; ++i) {
-        for (value_type j = 1; j <= SQRT_UPPER_LIMIT; ++j) {
-            long_value_type i_squared = i * i;
-            long_value_type j_squared = j * j;
-            long_value_type i_squared_3 = 3 * i_squared;
-
-            long_value_type v1 = 4 * i_squared + j_squared;
-            long_value_type v2 = i_squared_3 + j_squared;
-
-            if ((v1 <= UPPER_LIMIT) && ((v1 % 12 == 1) || (v1 % 12 == 5)))
-                mySieveTable[v1] = !mySieveTable[v1];
-
-            if ((v2 <= UPPER_LIMIT) && (v2 % 12 == 7))
-                mySieveTable[v2] = !mySieveTable[v2];
-
-            if (i > j) {
-                long_value_type v3 = i_squared_3 - j_squared;
-                if ((v3 <= UPPER_LIMIT) && (v3 % 12 == 11)) {
-                    mySieveTable[v3] = !mySieveTable[v3];
-                }
-            }
-        }
+    smallPrimes[0] = false;
+    smallPrimes[1] = false;
+    for (value_type i = 2; i <= SQRT_END;) {
+        for (int j = i * i; j <= SQRT_END; j += i)
+            smallPrimes[j] = false;
+        ++i;
+        while (i <= SQRT_END && !smallPrimes[i])
+            ++i;
     }
 
-    // Sieve and eliminate composites
-    for (value_type i = 5; i <= SQRT_UPPER_LIMIT; ++i) {
-        if (mySieveTable[i]) {
-            value_type i_squared = i * i;
-            for (value_type k = i_squared; k <= UPPER_LIMIT; k += i_squared) {
-                mySieveTable[k] = false;
-            }
-        }
-    }
+    // Eliminate from target primes
+    for (value_type k = 2; k <= SQRT_END; ++k) {
+        if (smallPrimes[k]) {
+            // (x + y - 1) / y gets the ceiling of int division
+            // i starts at ceil(begin / k) * k - a
+            value_type i = (std::max(2, (begin + k - 1) / k)) * k - begin;
 
-    // Print all values to the cache
-    for (int i = 2; i <= UPPER_LIMIT; ++i) {
-        if (mySieveTable[i])
-            global_eager_cache.push_back(i);
+            for (; i < lengthOfRange; i += k)
+                result[i] = false;
+        }
     }
 }
 
@@ -99,25 +69,36 @@ void readRange(value_type * range) {
 }
 
 /**
+ * @return true if n is a prime number
+ *         false otherwise
+ */
+bool isPrime(sieve_table& table, value_type n) {
+    return table[n];
+}
+
+/**
  * Read in the next line and print the primes the results
  */
 void runCase() {
     value_type range[2];
     readRange(range);
 
-    eager_cache_type_iterator i = global_eager_cache.begin();
-    while (i != global_eager_cache.end() && *i < range[0])
-        ++i;
+    sieve_table mySieveTable;
+    ertosthenes(mySieveTable, range[0], range[1]);
 
-    while (i != global_eager_cache.end() && *i <= range[1]) {
-        std::cout << *i << std::endl;
-        ++i;
+    value_type dist = range[1] - range[0];
+
+    for (value_type i = 0; i <= dist; ++i) {
+        if (mySieveTable[i])
+            std::cout << i + range[0] << std::endl;
     }
 }
 
 int main() {
     // Fill eager cache
-    fillEagerCache();
+    double time_diff;
+    clock_t start, end;
+    start = clock();
 
     int numberOfLines;
     std::cin >> numberOfLines;
@@ -128,5 +109,10 @@ int main() {
         if (numberOfLines != 0)
             std::cout << std::endl;
     }
+
+    end = clock();
+    time_diff = static_cast<double> (end - start) / CLOCKS_PER_SEC;
+    std::cerr << "Time: " << time_diff << "\n" << std::flush;
+
     return 0;
 }
