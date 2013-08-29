@@ -1,13 +1,28 @@
-run: primeGenerator.rb
+runc: PrimeGenerator
+	PrimeGenerator
+
+runci: PrimeGenerator
+	PrimeGenerator < primeGenerator.in
+
+diffc: PrimeGenerator
+	PrimeGenerator < primeGenerator.in > primeGenerator.tmp
+	diff primeGenerator.out primeGenerator.tmp
+	rm primeGenerator.tmp
+
+PrimeGenerator: primeGenerator.cpp
+	g++ -pedantic -Wall primeGenerator.cpp -o PrimeGenerator
+
+runr: primeGenerator.rb
 	ruby primeGenerator.rb
 
-runi: primeGenerator.rb
+runri: primeGenerator.rb
 	ruby primeGenerator.rb < primeGenerator.in
 
-test: primeGenerator.rb
+diffr: primeGenerator.rb
 	ruby primeGenerator.rb < primeGenerator.in > primeGenerator.tmp
 	diff primeGenerator.out primeGenerator.tmp
 	rm -f primeGenerator.tmp
 
 clean:
 	rm -f primeGenerator.tmp
+	rm -f PrimeGenerator
