@@ -1,11 +1,11 @@
 runc: PrimeGenerator
-	PrimeGenerator
+	./PrimeGenerator
 
 runci: PrimeGenerator
-	PrimeGenerator < primeGenerator.in
+	./PrimeGenerator < primeGenerator.in
 
 diffc: PrimeGenerator
-	PrimeGenerator < primeGenerator.in > primeGenerator.tmp
+	./PrimeGenerator < primeGenerator.in > primeGenerator.tmp
 	diff primeGenerator.out primeGenerator.tmp
 	rm primeGenerator.tmp
 
