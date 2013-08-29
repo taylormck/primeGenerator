@@ -1,3 +1,6 @@
+<!-- Travis CI build and test status -->
+[![Build Status](https://travis-ci.org/taylormck/primeGenerator.png)]
+(https://travis-ci.org/taylormck/primeGenerator)
 Prime Generator
 ==============
 
@@ -26,14 +29,14 @@ Example
 -------
 
 #####Input:
-    2  
-    1 10  
-    3 5  
+    2
+    1 10
+    3 5
 #####Output:
-    2  
-    3  
-    5  
-    7  
-    
+    2
+    3
+    5
+    7
+
     3
     5

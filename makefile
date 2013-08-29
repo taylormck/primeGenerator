@@ -23,6 +23,8 @@ diffr: primeGenerator.rb
 	diff primeGenerator.out primeGenerator.tmp
 	rm -f primeGenerator.tmp
 
+test: diffc diffr
+
 clean:
 	rm -f primeGenerator.tmp
 	rm -f PrimeGenerator
