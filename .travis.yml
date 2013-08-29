@@ -3,3 +3,6 @@ language:
     - rb
 
 script: "make test"
+
+notifications:
+    email: false
