@@ -1,14 +1,43 @@
 #!/usr/bin/env ruby -wKU
 # Prime Generator
-require 'set' # set
+
+UPPER_LIMIT = 1000000000
+
+# Perform the sieve itself
+def sieve(table, b, e)
+  lengthOfRange = e - b + 1
+
+  # Generate small primes
+  sqrt_end = Math.sqrt(e).floor
+  smallPrimes = Array.new(sqrt_end + 1, true);
+
+  for i in 2..sqrt_end
+    if smallPrimes[i]
+      j = i**2
+      while j <= sqrt_end
+        smallPrimes[j] = false
+        j += i
+      end
+    end
+  end
+
+  for k in 2..sqrt_end
+    if smallPrimes[k]
+      i = [2, (b + k - 1) / k].max * k - b
+      while i < lengthOfRange
+        table[i] = false
+        i += k
+      end
+    end
+  end
+end
 
 # Set the bounds of the range to be valid
 def setBoundsOnRange(range)
   # All prime numbers are >= 2
   # anything less than two won't be prime
-  if range[0] < 2
-    range[0] = 2
-  end
+  range[0] = [range[0], 2].max
+  range[1] = [range[1], UPPER_LIMIT].min
 
   return range
 end
@@ -22,58 +51,17 @@ def readLineIntoArray
   return range
 end
 
-# @return true if n is prime
-#         false otherwise
-def isPrime(n)
-  # Special case where n is even
-  if n == 2
-    return true
-  elsif n % 2 == 0
-    return false
-  end
-
-  sqrt_n = Math.sqrt(n)
-  numbersToCheck = 3..sqrt_n
-  numbersToCheck.step(2) do |i|
-    if n % i == 0
-      return false
-    end
-  end
-  return true
-end
-
-# Takes in a range and returns a list of numbers that
-# should be checked for primality, stripping numbers
-# that are multiples of numbers earlier in the range
-def getListOfNumbersToCheck(range)
-  list = *(range[0]..range[1])
-
-  i = 0
-  while i < list.length
-    smallerValue = list[i]
-    j = i + 1
-    while j < list.length
-      largerValue = list[j]
-      if largerValue % smallerValue == 0
-        list.delete_at(j)
-      elsif
-        j += 1
-      end
-    end
-    i += 1
-  end
-
-  return list
-end
-
 # Read in the next line and print the primes the results
 def runCase
   range = readLineIntoArray
-  numbersToCheck = getListOfNumbersToCheck(range)
+  dist = range[1] - range[0] + 1
 
-  for i in numbersToCheck
-    if isPrime(i)
-      print i, "\n"
+  table = Array.new(dist, true)
+  sieve(table, range[0], range[1])
+
+  for i in 0..dist
+    if table.at(i)
+      print i + range[0], "\n"
     end
   end
 end
